@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>lutsheet — LUT contact sheets</title>
+<meta name="description" content="Drop in a frame and a folder of LUTs. Get a grid comparing them all.">
+<!-- Satoshi (Fontshare, free). To self-host, see fonts/README.md -->
+<link rel="preconnect" href="https://api.fontshare.com">
+<link rel="preconnect" href="https://cdn.fontshare.com" crossorigin>
+<link href="https://api.fontshare.com/v2/css?f[]=satoshi@300,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="app">
+
+  <aside class="side" id="side">
+    <header class="brand">
+      <h1>lutsheet</h1>
+      <p>One frame. Every LUT. Side by side.</p>
+      <button class="chip" id="themeBtn" title="Toggle off-black / off-white">off-black</button>
+    </header>
+
+    <section class="card">
+      <div class="head"><h2>Frame</h2><p>Drop an image, a video, or a still.</p></div>
+      <div class="row">
+        <button class="btn pri" id="pickSrc">Choose file</button>
+        <button class="btn" id="sampleBtn">Use sample</button>
+      </div>
+      <p class="status" id="srcStatus">Nothing loaded yet</p>
+      <div id="vidCtl" hidden>
+        <div id="vidSlider"></div>
+        <div class="row tight">
+          <button class="btn sm" id="stepBack">◀ frame</button>
+          <button class="btn sm" id="stepFwd">frame ▶</button>
+          <span class="mono" id="vidTime">0:00.00</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="head r"><h2>LUTs</h2><p>Drop a folder of <b>.cube</b> files.</p></div>
+      <div class="row">
+        <button class="btn pri" id="pickDir">Choose folder</button>
+        <button class="btn" id="pickCubes">Files</button>
+        <button class="btn" id="demoBtn">Demo looks</button>
+      </div>
+      <p class="status"><b id="lutCount">0</b> loaded<span id="hiddenNote"></span></p>
+      <div class="row tight"><button class="btn sm" id="clearLuts">Clear all</button><button class="btn sm" id="unhideAll" hidden>Show hidden</button></div>
+    </section>
+
+    <section class="card">
+      <div class="head"><h2>View</h2></div>
+      <div id="viewSliders"></div>
+      <div class="lbl">Tile shape</div>
+      <div id="aspectSeg"></div>
+      <div class="toggles" id="viewToggles"></div>
+    </section>
+
+    <section class="card">
+      <div class="head r"><h2>Master</h2><p>Applied on top of every LUT.</p></div>
+      <div id="masterSliders"></div>
+      <div class="row"><button class="btn sm" id="masterReset">Reset master</button></div>
+    </section>
+
+    <section class="card">
+      <div class="head"><h2>Export</h2><p>A contact sheet of what you see.</p></div>
+      <div class="lbl">Tile width</div><div id="expW"></div>
+      <div class="lbl">Columns</div><div id="expCols"></div>
+      <div class="lbl">Format</div><div id="expFmt"></div>
+      <div class="toggles" id="expToggles"></div>
+      <div class="row">
+        <button class="btn pri" id="exportBtn">Export sheet</button>
+      </div>
+      <div class="row tight">
+        <button class="btn sm" id="saveRecipe">Save recipe</button>
+        <button class="btn sm" id="loadRecipe">Load recipe</button>
+      </div>
+    </section>
+
+    <footer class="foot">Open source · MIT · everything runs locally in your browser</footer>
+  </aside>
+
+  <main class="stage" id="stage">
+    <div class="topbar">
+      <input id="filter" type="search" placeholder="filter LUTs" autocomplete="off" spellcheck="false">
+      <div id="sortSeg"></div>
+      <span class="mono" id="shown"></span>
+    </div>
+
+    <section class="card empty" id="empty">
+      <h2 id="emptyTitle">Drop a frame and a folder of LUTs</h2>
+      <p id="emptyText">Anywhere on this page. Images, video, <b>.cube</b> files, or whole folders.</p>
+    </section>
+
+    <div class="grid" id="grid"></div>
+  </main>
+</div>
+
+<!-- inspector -->
+<div class="insp" id="insp" hidden>
+  <section class="card insp-view">
+    <div class="view-top">
+      <div><h1 id="inName">—</h1><p id="inMeta"></p></div>
+      <div class="row tight"><button class="btn sm" id="inPrev">←</button><span class="mono" id="inIdx"></span><button class="btn sm" id="inNext">→</button><button class="btn" id="inClose">Close</button></div>
+    </div>
+    <div class="pv-wrap" id="pvWrap">
+      <div class="pv" id="pv">
+        <canvas id="pvLut"></canvas>
+        <canvas id="pvOrig"></canvas>
+        <div class="split" id="split"><i></i></div>
+        <span class="tag l">before</span><span class="tag r">after</span>
+      </div>
+    </div>
+  </section>
+  <div class="insp-side">
+    <section class="card"><div class="head"><h2>Look</h2></div><div id="gLook"></div></section>
+    <section class="card"><div class="head"><h2>Colour</h2></div><div id="gColour"></div></section>
+    <section class="card"><div class="head"><h2>Tone</h2></div><div id="gTone"></div>
+      <div class="lbl">Adjustments run</div><div id="orderSeg"></div></section>
+    <section class="card">
+      <div class="head r"><h2>This look</h2></div>
+      <div class="row">
+        <button class="btn" id="inReset">Reset</button>
+        <button class="btn" id="inApplyAll">Apply to all</button>
+      </div>
+      <div class="row">
+        <button class="btn" id="inStar">Star</button>
+        <button class="btn" id="inHide">Hide</button>
+        <button class="btn pri" id="inSave">Save full-res frame</button>
+      </div>
+    </section>
+  </div>
+</div>
+
+<div class="veil" id="veil"><span>Drop to load</span></div>
+<div class="toast" id="toast"></div>
+
+<input type="file" id="fSrc" accept="image/*,video/*" hidden>
+<input type="file" id="fDir" webkitdirectory directory multiple hidden>
+<input type="file" id="fCubes" accept=".cube" multiple hidden>
+<input type="file" id="fRecipe" accept=".json,application/json" hidden>
+
+<script src="js/cube.js"></script>
+<script src="js/gl.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
